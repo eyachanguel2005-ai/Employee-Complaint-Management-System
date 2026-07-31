@@ -167,12 +167,98 @@ async function afficherReclamations() {
     });
 }
 
+async function afficherGraphique() {
+
+    const date24h = new Date();
+    date24h.setHours(date24h.getHours() - 24);
+
+    const { data, error } = await supabaseClient
+        .from("reclamation")
+        .select("*")
+        .gte("created_at", date24h.toISOString());
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    let compteurChambres = {};
+
+    data.forEach(reclamation => {
+
+        const chambre = reclamation.chambre;
+
+        if (!compteurChambres[chambre]) {
+            compteurChambres[chambre] = 0;
+        }
+
+        compteurChambres[chambre]++;
+    });
+
+    let labels = [];
+    let valeurs = [];
+
+    for (let chambre in compteurChambres) {
+
+        if (compteurChambres[chambre] > 3) {
+
+            labels.push(chambre);
+            valeurs.push(compteurChambres[chambre]);
+        }
+    }
+
+    const ctx = document
+        .getElementById("chartReclamations")
+        .getContext("2d");
+
+    new Chart(ctx, {
+    type: "bar",
+
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Nombre de réclamations",
+            data: valeurs,
+            backgroundColor: "#e73636" // couleur des barreS
+        }]
+    },
+
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+}
+
+async function afficherNombreAttente() {
+
+    const { data, error } = await supabaseClient
+        .from("reclamation")
+        .select("id")
+        .eq("statut", "En attente");
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    document.getElementById("nbAttente").textContent =
+        "Réclamations en attente : " + data.length;
+}
 // =============================
 // CHARGEMENT DU TABLEAU
 // =============================
 
 // Affiche les réclamations dès l'ouverture de la page
 afficherReclamations();
+afficherGraphique();
+afficherNombreAttente();
 
 // Rafraîchit la page automatiquement après 5 secondes (5000 ms)
 setTimeout(function() {
