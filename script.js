@@ -1,8 +1,8 @@
 // =============================
 // CONNEXION SUPABASE
 // =============================
-const supabaseUrl = "https://xtahersjyepgvbxojpld.supabase.co";
-const supabaseKey = "sb_publishable_iBqcaF-f6otVAETbbHdf_g_en8_62t9";
+const supabaseUrl = "YOUR_SUPABASE_URL";
+const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
 
 const supabaseClient = supabase.createClient(
     supabaseUrl,
